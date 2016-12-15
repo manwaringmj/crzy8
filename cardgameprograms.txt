@@ -1,0 +1,406 @@
+CARDS
+	CRAZY 8
+	require "./Card"
+require "./Player"
+require "./Deck"
+
+
+def crazy_eights
+
+  deck = Deck.new
+
+  puts "What is your name player?"
+  name = gets.chomp.to_s
+  player = Player.new(name)
+  cpu = Player.new("The Computer")
+
+  deck.shuffle
+  deck.deal(player, cpu, 14)
+
+  puts "Welcome #{player.name}, it's time to play craaaaazy eights!"
+
+  card_on_top = deck.top_card
+
+  while player.cards.length > 0 && cpu.cards.length > 0
+    card_on_top = player_turn(card_on_top, player, deck)
+
+    card_on_top = computer_turn(card_on_top, cpu, deck)
+  end
+
+  if player.cards.length > 0
+    puts "You lose, better luck next time!"
+  elsif cpu.cards.length > 0
+    puts "YOU WIN!!!"
+  end
+
+end
+
+def player_turn(card_on_top, player, deck)
+  puts "The card on top is #{card_on_top.name}"
+
+  puts "You have:"
+  player.cards.each do |card|
+    puts card.name
+  end
+  puts ""
+
+  n = 0
+
+  playable_card_list = []
+
+  puts "You can play:"
+  player.cards.each do |card|
+    if card_on_top.rank == card.rank || card_on_top.suit == card.suit || card.rank == 8
+      puts "#{n}. #{card.name}"
+      n += 1
+      playable_card_list.push(card)
+    end
+  end
+  puts ""
+
+  if n == 0
+    puts "Since you have no playable cards you have to draw until you get one that you can play"
+    drawn_card = deck.top_card
+    puts "You drew a #{drawn_card.name}"
+    while card_on_top.rank != drawn_card.rank && card_on_top.suit != drawn_card.suit && drawn_card.rank != 8
+      player.add_card(drawn_card)
+      drawn_card = deck.top_card
+      puts "You drew a #{drawn_card.name}"
+    end
+    puts ""
+
+    card_on_top = drawn_card
+  else
+    card_number = 99999
+
+    puts "Type the number of the card you want to play"
+    card_number = gets.chomp.to_i
+
+    while card_number < 0 || card_number > (n - 1)
+      puts "That number isn't one in the list, please type another one"
+      card_number = gets.chomp.to_i
+    end
+    puts ""
+
+    card_on_top = player.play_selected_card(playable_card_list[card_number])
+  end
+
+  if card_on_top.rank == 8
+    puts "Since you played and 8 you get to choose the new suit"
+    puts "0. Heart"
+    puts "1. Diamond"
+    puts "2. Club"
+    puts "3. Spade"
+
+    suit_number = gets.chomp.to_i
+    while suit_number < 0 || suit_number > 3
+      puts "That number isn't one in the list, please type another one"
+      suit_number = gets.chomp.to_i
+    end
+
+    if suit_number == 0
+      card_on_top.change_suit("Heart")
+    elsif suit_number == 1
+      card_on_top.change_suit("Diamond")
+    elsif suit_number == 2
+      card_on_top.change_suit("Club")
+    elsif suit_number == 3
+      card_on_top.change_suit("Spade")
+    end
+  end
+
+  puts "The new card on top is #{card_on_top.name}"
+
+  return card_on_top
+end
+
+def computer_turn(card_on_top, cpu, deck)
+  playable_card_list = []
+
+  cpu.cards.each do |card|
+    if card_on_top.rank == card.rank || card_on_top.suit == card.suit || card.rank == 8
+      playable_card_list.push(card)
+    end
+  end
+
+  if playable_card_list.length == 0
+    drawn_card = deck.top_card
+    puts "#{cpu.name} drew a card"
+    while card_on_top.rank != drawn_card.rank && card_on_top.suit != drawn_card.suit && drawn_card.rank != 8
+      cpu.add_card(drawn_card)
+      drawn_card = deck.top_card
+      puts "#{cpu.name} drew another card"
+    end
+    puts ""
+
+    card_on_top = drawn_card
+  else
+    card_on_top = cpu.play_selected_card(playable_card_list[0])
+  end
+
+  if card_on_top.rank == 8
+
+    suit_number = rand(4)
+
+    if suit_number == 0
+      card_on_top.change_suit("Heart")
+    elsif suit_number == 1
+      card_on_top.change_suit("Diamond")
+    elsif suit_number == 2
+      card_on_top.change_suit("Club")
+    elsif suit_number == 3
+      card_on_top.change_suit("Spade")
+    end
+  end
+
+  puts "The new card on top is #{card_on_top.name}"
+
+  return card_on_top
+end
+
+crazy_eights
+
+
+
+WAR WAR WAR
+
+	require "./Card"
+require "./Player"
+require "./Deck"
+
+# WAR !!!
+# deck = Deck.new
+# player1 = Player.new("Player 1")
+# player2 = Player.new("Player 2")
+#
+# deck.shuffle
+# deck.deal(player1, player2, 52)
+#
+# def play(player1, player2)
+#   cards_in_play = []
+#   runs = 0
+#
+#   while (!player1.cards.empty? && !player2.cards.empty?)
+#     runs += 1
+#     if runs % 100 == 0
+#       player1.shuffle
+#       player2.shuffle
+#     end
+#
+#     player1_card = player1.play_card
+#     player2_card = player2.play_card
+#
+#     puts "#{player1.name} played a #{player1_card.name}"
+#     puts "#{player2.name} played a #{player2_card.name}"
+#
+#     cards_in_play.push(player1_card, player2_card)
+#
+#     winner = determine_winner(player1, player2, player1_card, player2_card)
+#
+#     while winner == 0
+#       winner_and_cards = play_war(player1, player2)
+#       winner_and_cards[1].each do |card|
+#         cards_in_play.push(card)
+#       end
+#
+#       winner = winner_and_cards[0]
+#     end
+#
+#     while !cards_in_play.empty?
+#       card = cards_in_play.delete_at(0)
+#       winner.add_card(card)
+#     end
+#
+#   end
+#
+#   if player1.cards.empty?
+#     puts "#{player1.name} is out of cards, game over"
+#   end
+#
+#   if player2.cards.empty?
+#     puts "#{player2.name} is out of cards, game over"
+#   end
+# end
+#
+# def play_war(player1, player2)
+#   cards = []
+#
+#   if player1.cards.length <= 2
+#     puts "#{player1.name} doesn't have enough cards to play war"
+#     how_many_cards = player1.cards.length + 1
+#
+#     how_many_cards.times do
+#       cards.push(player1.play_card)
+#     end
+#
+#     winner = player2
+#   elsif player2.cards.length <= 2
+#     puts "#{player2.name} doesn't have enough cards to play war"
+#     how_many_cards = player1.cards.length + 1
+#
+#     how_many_cards.times do
+#       cards.push(player1.play_card)
+#     end
+#
+#     winner = player1
+#   else
+#
+#     player1_facedown_card = player1.play_card
+#     player1_faceup_card = player1.play_card
+#     player2_facedown_card = player2.play_card
+#     player2_faceup_card = player2.play_card
+#
+#     puts "#{player1.name} played a face-down card and a #{player1_faceup_card.name}"
+#     puts "#{player2.name} played a face-down card and a #{player2_faceup_card.name}"
+#     puts ""
+#
+#     cards.push(player1_facedown_card, player1_faceup_card, player2_facedown_card, player2_faceup_card)
+#
+#     winner = determine_winner(player1, player2, player1_faceup_card, player2_faceup_card)
+#
+#     if winner != 0
+#       puts "#{winner.name} has won the war"
+#       puts ""
+#     end
+#
+#   end
+#
+#   winner_and_cards = [winner, cards]
+#
+#   return winner_and_cards
+# end
+#
+# def determine_winner(player1, player2, player1_card, player2_card)
+#   if player1_card.rank > player2_card.rank
+#     puts "#{player1.name} wins the hand"
+#     winner = player1
+#   elsif player1_card.rank < player2_card.rank
+#     puts "#{player2.name} wins the hand"
+#     winner = player2
+#   else
+#     puts "There is a tie, THIS MEANS WAR!!!"
+#     winner = 0
+#   end
+#   puts ""
+#   return winner
+# end
+#
+# play(player1, player2)
+
+
+
+
+CARD CARD CARD
+	class Card
+
+  attr_reader :name
+
+  def initialize(name)
+    @name = name
+  end
+
+  def rank
+    rank = (name.split("-"))[0]
+    if rank == "Jack"
+      rank = 11
+    elsif rank == "Queen"
+      rank = 12
+    elsif rank == "King"
+      rank = 13
+    elsif rank == "Ace"
+      rank = 14
+    else
+      rank = rank.to_i
+    end
+  end
+
+  def suit
+    suit = (name.split("-"))[1]
+  end
+
+  def change_suit(suit)
+    rank = (name.split("-"))[0]
+    name = "#{rank}-#{suit}"
+    @name = name
+  end
+
+end
+
+DECK DECK DECK
+	class Deck
+
+  require "./Card"
+  require "./Player"
+
+  attr_accessor :names, :cards
+
+  def initialize(cards = [])
+    @names = ["Ace-Heart", "2-Heart", "3-Heart", "4-Heart", "5-Heart", "6-Heart", "7-Heart", "8-Heart", "9-Heart", "10-Heart", "Jack-Heart", "Queen-Heart", "King-Heart", "Ace-Diamond", "2-Diamond", "3-Diamond", "4-Diamond", "5-Diamond", "6-Diamond", "7-Diamond", "8-Diamond", "9-Diamond", "10-Diamond", "Jack-Diamond", "Queen-Diamond", "King-Diamond", "Ace-Club", "2-Club", "3-Club", "4-Club", "5-Club", "6-Club", "7-Club", "8-Club", "9-Club", "10-Club", "Jack-Club", "Queen-Club", "King-Club", "Ace-Spade", "2-Spade", "3-Spade", "4-Spade", "5-Spade", "6-Spade", "7-Spade", "8-Spade", "9-Spade", "10-Spade", "Jack-Spade", "Queen-Spade", "King-Spade"]
+    52.times do |n|
+      cards.push(Card.new(names[n%names.size]))
+    end
+    @cards = cards
+  end
+
+  def shuffle
+    cards.shuffle!
+
+    @cards = cards
+  end
+
+  def deal(player1, player2, amount_of_cards)
+    player_card = 0
+
+    amount_of_cards.times do |card|
+      if player_card == 0
+        player1.add_card(cards[0])
+        player_card = 1
+      else
+        player2.add_card(cards[0])
+        player_card = 0
+      end
+      cards.delete_at(0)
+    end
+
+  end
+
+  def top_card
+    return cards.delete_at(0)
+  end
+
+end
+
+
+PLAYER PLAYER PLAYER
+
+class Player
+
+  attr_accessor :name
+  attr_reader :cards
+
+  def initialize(name, cards = [])
+    @cards = cards
+    @name = name
+  end
+
+  def add_card(card)
+    cards.push(card)
+
+    @cards = cards
+  end
+
+  def play_card
+    return cards.delete_at(0)
+  end
+
+  def play_selected_card(card)
+    return cards.delete(card)
+  end
+
+  def shuffle
+    cards.shuffle!
+
+    @cards = cards
+  end
+
+end
